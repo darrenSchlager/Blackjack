@@ -167,13 +167,13 @@ class BlackjackHand {
 	private String cardString;
 	private String dealerCardString;
 	private int handValue;
-	private boolean hasBlackjack;
+	private int numAces;
 
 	public BlackjackHand() {
 		cardString = "";
 		dealerCardString = "";
 		handValue = 0;
-		hasBlackjack = false;
+		numAces = 0;
 	}
 
 	public boolean addCard(Deck deck) {
@@ -187,36 +187,22 @@ class BlackjackHand {
 			else
 				dealerCardString += card.getName();
 				
-			setHandValueAndHasBlackjack();
+			updateHandValueAndNumAces(card.getRank());
 			return true;
 		}
 		else
 			return false;
 	}
-
-	private void setHandValueAndHasBlackjack() {
-		int numAces = 0;
-		handValue = 0;
-
-		for(Card card : cards) {
-			int rank = card.getRank();
-
-			if(rank>10 && rank<14)
-				handValue+= 10;
-			else if(rank==14) {
-				handValue+= 11;
-				numAces++;
-			}
-			else
-				handValue += rank;
+	
+	private void updateHandValueAndNumAces(int cardRank) {
+		if(cardRank>10 && cardRank<14)
+			handValue+= 10;
+		else if(cardRank==14) {
+			handValue+= 11;
+			numAces++;
 		}
-		while(handValue>21 && numAces>0) {
-			handValue-=10;
-			numAces--;
-		}
-
-		if(handValue==21 && cards.size()==2)
-			hasBlackjack = true;
+		else
+			handValue += cardRank;
 	}
 
 	public String getCardString() {
@@ -228,11 +214,17 @@ class BlackjackHand {
 	}
 
 	public int getHandValue() {
-		return handValue;
+		int finalHandValue = handValue;
+		int acesCountingAsEleven = numAces;
+		while(finalHandValue>21 && acesCountingAsEleven>0) {
+			finalHandValue-=10;
+			acesCountingAsEleven--;
+		}
+		return finalHandValue;
 	}
 
 	public boolean hasBlackjack() {
-		return hasBlackjack;
+		return handValue==21 && cards.size()==2;
 	}
 }
 
